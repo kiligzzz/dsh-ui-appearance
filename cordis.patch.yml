@@ -5,4 +5,4 @@
 # uninstall, remove the package (or `dsh plugin remove ui-appearance`).
 - insert:
     - id: ui-appearance
-      name: 'dsh-ui-appearance'
+      name: '@kiligzzz/dsh-ui-appearance'

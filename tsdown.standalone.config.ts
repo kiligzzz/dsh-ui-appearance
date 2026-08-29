@@ -37,7 +37,7 @@ const INLINE_SAFE = /^@deepseek-ai\/dsh-(host-apiproxy|session|llm|tools|brand)(
 /** Externals resolved from the loader module table. */
 const CLIENT_EXTERNALS: readonly string[] = [...PLATFORM_MODULES, RUNTIME_STORE_EXEMPTION]
 
-const PACKAGE_ID = 'dsh-ui-appearance'
+const PACKAGE_ID = '@kiligzzz/dsh-ui-appearance'
 
 const CSS_VIRTUAL_PREFIX = '\0dsh-css:'
 const CSS_VIRTUAL_SUFFIX = '.mjs'
