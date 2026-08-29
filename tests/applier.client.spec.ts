@@ -73,6 +73,24 @@ describe('AppearanceApplier', () => {
     expect(remove).toHaveBeenCalled()
   })
 
+  it('conversation glass marks the body and adds its blur to the wallpaper filter', () => {
+    const { ctx } = fakeCtx()
+    const applier = new AppearanceApplier(ctx)
+    applier.apply(full({ backgroundBlur: 4, glassBlur: 6, conversationGlass: true, conversationGlassBlur: 10 }))
+    const body = document.body
+    expect(body.dataset.dswConversationGlass).toBe('')
+    expect(body.style.getPropertyValue('--dsw-appearance-blur')).toBe('20px')
+    // The stylesheet keys the conversation surfaces off the marker.
+    const sheet = document.getElementById(STYLE_ID)?.textContent ?? ''
+    expect(sheet).toContain('body[data-dsw-conversation-glass] .dshDesktopConversationSurface')
+    // Off: marker removed, blur back to the non-conversation sum.
+    applier.apply(full({ backgroundBlur: 4, glassBlur: 6, conversationGlass: false }))
+    expect(body.dataset.dswConversationGlass).toBeUndefined()
+    expect(body.style.getPropertyValue('--dsw-appearance-blur')).toBe('10px')
+    applier.dispose()
+    expect(body.dataset.dswConversationGlass).toBeUndefined()
+  })
+
   it('apply with undefined settings applies the default white accent', () => {
     const { ctx, overrideTokens, remove } = fakeCtx()
     const applier = new AppearanceApplier(ctx)

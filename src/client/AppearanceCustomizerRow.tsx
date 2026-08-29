@@ -551,6 +551,26 @@ export function AppearanceCustomizerRow({
               format={value => `${value}px`}
               onChange={value => { set('glassBlur', value) }}
             />
+            <label className={css.checkRow}>
+              <input
+                type="checkbox"
+                className={css.checkbox}
+                checked={settings.conversationGlass}
+                onChange={event => { set('conversationGlass', event.target.checked) }}
+              />
+              <span className={css.sliderLabel}>{t('surface.conversationGlass')}</span>
+            </label>
+            {settings.conversationGlass && (
+              <Slider
+                label={t('surface.conversationGlassBlur')}
+                value={settings.conversationGlassBlur}
+                min={0}
+                max={GLASS_BLUR_MAX}
+                step={1}
+                format={value => `${value}px`}
+                onChange={value => { set('conversationGlassBlur', value) }}
+              />
+            )}
             <div className={css.hint}>{t('surface.hint')}</div>
           </div>
 

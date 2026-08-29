@@ -16,7 +16,7 @@ describe('sanitizeSettings', () => {
       ...DEFAULT_SETTINGS,
       accent: '#4176e6', text: '#111111',
       backgroundOpacity: 0.5, backgroundBlur: 12, scrim: 0.4, surfaceAlpha: 0.8, glassBlur: 8,
-      sidebarOpaque: true, preset: 'midnight',
+      sidebarOpaque: true, conversationGlass: true, conversationGlassBlur: 12, preset: 'midnight',
     }
     expect(sanitizeSettings(valid)).toEqual(valid)
   })
@@ -62,10 +62,11 @@ describe('sanitizeSettings', () => {
   it('coerces legacy 1/0 booleans to real booleans', () => {
     const sanitized = sanitizeSettings({
       ...DEFAULT_SETTINGS,
-      sidebarOpaque: 1, imageDark: 0,
+      sidebarOpaque: 1, imageDark: 0, conversationGlass: 1,
     })
     expect(sanitized.sidebarOpaque).toBe(true)
     expect(sanitized.imageDark).toBe(false)
+    expect(sanitized.conversationGlass).toBe(true)
   })
 
   it('drops unknown fields and keeps known strings', () => {

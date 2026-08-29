@@ -64,6 +64,12 @@ export interface AppearanceSettings extends AppearanceColors {
   codeAlpha: number
   /** Keep the sidebar fill opaque even when surfaceAlpha is below 1. */
   sidebarOpaque: boolean
+  /** Make the conversation area (message list + composer column) translucent
+   * so the wallpaper shows through it. Independent of surfaceAlpha: the panel
+   * slider also fades every panel, this only fades the chat surface. */
+  conversationGlass: boolean
+  /** Conversation-area glass blur in px, 0..20 (0 = no extra blur). */
+  conversationGlassBlur: number
   /** Glass blur in px added to the wallpaper blur, 0..20 (0 = no extra blur). */
   glassBlur: number
   /** Tint alpha of emphasized text chips (inline code), 0..0.45. */
@@ -92,6 +98,8 @@ export const DEFAULT_SETTINGS: AppearanceSettings = {
   inputAlpha: 1,
   codeAlpha: 1,
   sidebarOpaque: false,
+  conversationGlass: false,
+  conversationGlassBlur: 8,
   glassBlur: 0,
   emphasisAlpha: 0.22,
   preset: '',
@@ -105,12 +113,13 @@ const NUMERIC_BOUNDS: Record<string, { min: number; max: number }> = {
   surfaceAlpha: { min: 0, max: 1 },
   inputAlpha: { min: 0, max: 1 },
   codeAlpha: { min: 0, max: 1 },
+  conversationGlassBlur: { min: 0, max: GLASS_BLUR_MAX },
   glassBlur: { min: 0, max: GLASS_BLUR_MAX },
   emphasisAlpha: { min: EMPHASIS_ALPHA_MIN, max: EMPHASIS_ALPHA_MAX },
 }
 
 /** Boolean fields, used to sanitize persisted input. */
-const BOOLEAN_FIELDS = ['imageDark', 'sidebarOpaque'] as const
+const BOOLEAN_FIELDS = ['imageDark', 'sidebarOpaque', 'conversationGlass'] as const
 
 /** Canonicalize a hex color: lowercase, 3-digit expanded to 6-digit. */
 function normalizeHex(value: string): string {

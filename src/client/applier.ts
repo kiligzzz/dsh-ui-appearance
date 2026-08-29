@@ -96,6 +96,19 @@ body[data-ds-dark-theme] #${BG_LAYER_ID} {
   outline: 2px solid var(--dsw-alias-state-business-primary);
   outline-offset: 2px;
 }
+/* Conversation-area glass: when the dedicated toggle is on, the Desktop shell
+   columns (advanced/extended mode) drop their opaque fill so the wallpaper
+   layer behind them shows through the chat. The readability veil stays in
+   the wallpaper layer itself (--dsw-appearance-scrim); surfaces painted with
+   translucent tokens (bubbles, composer, code) keep their own alpha from the
+   surface/input/code sliders, so text stays readable while the area frosted. */
+body[data-dsw-conversation-glass] .dshDesktopConversationSurface,
+body[data-dsw-conversation-glass] .dshDesktopDetailsSurface {
+  background: transparent !important;
+}
+body[data-dsw-conversation-glass] .dshDesktopFrame {
+  background: transparent !important;
+}
 `
 
 /**
@@ -160,6 +173,22 @@ export class AppearanceApplier {
     // stock 2px. dispose() removes the write so uninstall restores stock.
     body.style.setProperty('--dsw-mask-blur', `blur(${value.glassBlur}px)`)
     body.style.setProperty('--dsw-appearance-scrim', String(value.scrim))
+    // Conversation-area glass: the toggle flips a body marker the stylesheet
+    // keys on (surfaces go transparent only when enabled), and its own blur
+    // rides the same wallpaper-layer filter as the background blur.
+    if (value.conversationGlass) {
+      body.dataset.dswConversationGlass = ''
+      body.style.setProperty(
+        '--dsw-appearance-blur',
+        `${value.backgroundBlur + value.glassBlur + value.conversationGlassBlur}px`,
+      )
+    } else {
+      delete body.dataset.dswConversationGlass
+      body.style.setProperty(
+        '--dsw-appearance-blur',
+        `${value.backgroundBlur + value.glassBlur}px`,
+      )
+    }
     // A background video (IndexedDB record key) replaces the image layer;
     // loading is async and only re-runs when the key changes.
     void this.syncVideo(value.backgroundVideo)
@@ -285,5 +314,6 @@ export class AppearanceApplier {
     const body = document.body
     for (const name of BODY_VARIABLES) body.style.removeProperty(name)
     body.style.removeProperty('--dsw-mask-blur')
+    delete body.dataset.dswConversationGlass
   }
 }
