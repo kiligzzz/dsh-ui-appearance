@@ -58,15 +58,46 @@ export const STORAGE_KEY = 'dsh-ui-appearance.settings'
  * Read the persisted section, tolerating a missing, corrupt, or out-of-schema
  * entry: parse failures fall back to the stock defaults, and every parsed
  * field is validated against the schema bounds before it reaches the UI.
+ * One-shot migration: composer-effect preferences previously lived in their
+ * own localStorage keys (dsh-glass-composer); when a stored section predates
+ * the merge, seed the composer fields from those keys so existing users keep
+ * their toggle choices. Returns the default section when nothing is stored.
  * @returns the stored settings, or the stock defaults.
  */
 function readStoredSettings(): AppearanceSettings {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw === null) return { ...DEFAULT_SETTINGS }
-    return sanitizeSettings(JSON.parse(raw))
+    const parsed = sanitizeSettings(JSON.parse(raw))
+    // Migration: composer toggles moved into the section. Only when the
+    // stored section predates the merge (missing the composer fields) do we
+    // read the legacy per-key preferences (dsh-glass-composer); a fresh
+    // section keeps its schema defaults.
+    const migrated = { ...parsed }
+    const stored = JSON.parse(raw) as Record<string, unknown>
+    const predatesMerge =
+      typeof stored.aistudioComposer !== 'boolean' &&
+      typeof stored.glassComposer !== 'boolean' &&
+      typeof stored.glowComposer !== 'boolean'
+    if (predatesMerge) {
+      migrated.aistudioComposer = readLegacyToggle('dsh.aistudioComposer', DEFAULT_SETTINGS.aistudioComposer)
+      migrated.glassComposer = readLegacyToggle('dsh.glassComposer', DEFAULT_SETTINGS.glassComposer)
+      migrated.glowComposer = readLegacyToggle('dsh.glowComposer', DEFAULT_SETTINGS.glowComposer)
+    }
+    return migrated
   } catch (_unreadableStorage) {
     return { ...DEFAULT_SETTINGS }
+  }
+}
+
+/** Read a legacy composer-toggle localStorage key ('1'/'0' or absent). */
+function readLegacyToggle(key: string, fallback: boolean): boolean {
+  try {
+    const value = localStorage.getItem(key)
+    if (value === null) return fallback
+    return value === '1'
+  } catch (_storageUnreadable) {
+    return fallback
   }
 }
 

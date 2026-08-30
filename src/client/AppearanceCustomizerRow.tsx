@@ -571,6 +571,34 @@ export function AppearanceCustomizerRow({
                 onChange={value => { set('conversationGlassBlur', value) }}
               />
             )}
+            <div className={css.sectionTitle}>{t('composer.title')}</div>
+            <label className={css.checkRow}>
+              <input
+                type="checkbox"
+                className={css.checkbox}
+                checked={settings.aistudioComposer}
+                onChange={event => { set('aistudioComposer', event.target.checked) }}
+              />
+              <span className={css.sliderLabel}>{t('composer.aistudio')}</span>
+            </label>
+            <label className={css.checkRow}>
+              <input
+                type="checkbox"
+                className={css.checkbox}
+                checked={settings.glassComposer}
+                onChange={event => { set('glassComposer', event.target.checked) }}
+              />
+              <span className={css.sliderLabel}>{t('composer.glass')}</span>
+            </label>
+            <label className={css.checkRow}>
+              <input
+                type="checkbox"
+                className={css.checkbox}
+                checked={settings.glowComposer}
+                onChange={event => { set('glowComposer', event.target.checked) }}
+              />
+              <span className={css.sliderLabel}>{t('composer.glow')}</span>
+            </label>
             <div className={css.hint}>{t('surface.hint')}</div>
           </div>
 

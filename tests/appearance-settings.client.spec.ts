@@ -69,6 +69,16 @@ describe('sanitizeSettings', () => {
     expect(sanitized.conversationGlass).toBe(true)
   })
 
+  it('keeps the composer toggles and their legacy 1/0 forms', () => {
+    const sanitized = sanitizeSettings({
+      ...DEFAULT_SETTINGS,
+      aistudioComposer: 0, glassComposer: 1, glowComposer: 0,
+    })
+    expect(sanitized.aistudioComposer).toBe(false)
+    expect(sanitized.glassComposer).toBe(true)
+    expect(sanitized.glowComposer).toBe(false)
+  })
+
   it('drops unknown fields and keeps known strings', () => {
     const sanitized = sanitizeSettings({
       ...DEFAULT_SETTINGS,

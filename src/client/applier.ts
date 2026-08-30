@@ -19,6 +19,13 @@ export const BG_LAYER_ID = 'dsw-appearance-bg'
 /** Stylesheet element id owned by this plugin. */
 export const STYLE_ID = 'dsw-appearance-styles'
 
+/** Composer-effect body attributes (mirrors the host half's constants). */
+export const COMPOSER_ATTRS = {
+  aistudio: 'data-dsh-aistudio-composer',
+  glass: 'data-dsh-glass-composer',
+  glow: 'data-dsh-glow-composer',
+} as const
+
 /** CSS variables the applier writes on body, consumed by the stylesheet. */
 const BODY_VARIABLES = [
   '--dsw-appearance-bg-image',
@@ -109,6 +116,28 @@ body[data-dsw-conversation-glass] .dshDesktopDetailsSurface {
 body[data-dsw-conversation-glass] .dshDesktopFrame {
   background: transparent !important;
 }
+/* Composer effects (migrated from dsh-glass-composer). Each effect gates on a
+   body attribute the host half pre-applies before mount and the applier keeps
+   in sync with the settings section. */
+[data-phase="hero"] [data-composer-card]{transition:background .3s ease,border-color .3s ease,box-shadow .3s ease}
+body[data-dsh-glass-composer] [data-phase="hero"] [data-composer-card]{background:rgba(255,255,255,.45);-webkit-backdrop-filter:blur(28px) saturate(1.8);backdrop-filter:blur(28px) saturate(1.8);border:1px solid rgba(255,255,255,.65);box-shadow:0 12px 40px rgba(70,90,180,.14),inset 0 1px 0 rgba(255,255,255,.85),inset 0 -1px 0 rgba(255,255,255,.28)}
+body[data-ds-dark-theme][data-dsh-glass-composer] [data-phase="hero"] [data-composer-card]{background:rgba(26,28,36,.42);border:1px solid rgba(255,255,255,.16);box-shadow:0 14px 48px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.15),inset 0 -1px 0 rgba(255,255,255,.05)}
+@property --dshGlowAngle{syntax:"<angle>";initial-value:0deg;inherits:false}
+[data-composer-card]{transition:border-color .25s ease}
+body[data-dsh-glow-composer] [data-composer-card][data-composer-running]{border-color:transparent}
+body[data-dsh-glow-composer] [data-composer-card][data-composer-running]:before,
+body[data-dsh-glow-composer] [data-composer-card][data-composer-running]:after{content:"";position:absolute;pointer-events:none;border-radius:24px;background:conic-gradient(from var(--dshGlowAngle),transparent 0deg 240deg,#4D6BFE 275deg,#9E4DFF 310deg,#00C2D8 335deg,#FF5CA8 350deg,transparent 360deg);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude}
+body[data-dsh-glow-composer] [data-composer-card][data-composer-running]:before{inset:-1.5px;padding:1.5px}
+body[data-dsh-glow-composer] [data-composer-card][data-composer-running]:after{inset:-4px;padding:4px;filter:blur(4px);opacity:.4}
+@media (prefers-reduced-motion:no-preference){body[data-dsh-glow-composer] [data-composer-card][data-composer-running]:before,body[data-dsh-glow-composer] [data-composer-card][data-composer-running]:after{animation:dshGlowSpin 3.2s linear infinite}}
+@keyframes dshGlowSpin{to{--dshGlowAngle:360deg}}
+@property --dshAuroraAngle{syntax:"<angle>";initial-value:0deg;inherits:false}
+body[data-dsh-aistudio-composer] [data-phase="hero"] [data-composer-card]{border-color:transparent}
+body[data-dsh-aistudio-composer] [data-phase="hero"] [data-composer-card]:before{content:"";position:absolute;pointer-events:none;inset:-2px;padding:2px;border-radius:24px;opacity:.9;background:conic-gradient(from var(--dshAuroraAngle),#4285F4 0deg,#A142F4 90deg,#FF5CA8 160deg,#F9AB00 235deg,#00C2D8 300deg,#4285F4 360deg);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude}
+body[data-dsh-aistudio-composer] [data-phase="hero"] [data-composer-card]:after{content:"";position:absolute;pointer-events:none;inset:-70px;border-radius:92px;background:conic-gradient(from var(--dshAuroraAngle),#4285F4 0deg,#A142F4 90deg,#FF5CA8 160deg,#F9AB00 235deg,#00C2D8 300deg,#4285F4 360deg);filter:blur(40px) saturate(1.2);opacity:.2;z-index:-1}
+body[data-dsh-aistudio-composer] [data-phase="hero"] [data-composer-card]:hover:before{opacity:1;filter:saturate(1.2) brightness(1.08)}
+@media (prefers-reduced-motion:no-preference){body[data-dsh-aistudio-composer] [data-phase="hero"] [data-composer-card]:before{animation:dshAuroraSpin 4s linear infinite}body[data-dsh-aistudio-composer] [data-phase="hero"] [data-composer-card]:after{animation:dshAuroraSpin 10s linear infinite}}
+@keyframes dshAuroraSpin{to{--dshAuroraAngle:360deg}}
 `
 
 /**
@@ -124,6 +153,7 @@ export class AppearanceApplier {
   private imageToken = ''
   private imageUrl: string | undefined
   private removeOverrides: (() => void) | undefined
+  private runningObserver: MutationObserver | undefined
 
   /**
    * @param ctx - client context providing the theme service.
@@ -136,6 +166,7 @@ export class AppearanceApplier {
     this.layer = document.createElement('div')
     this.layer.id = BG_LAYER_ID
     document.body.prepend(this.layer)
+    this.observeRunning()
   }
 
   /**
@@ -192,6 +223,14 @@ export class AppearanceApplier {
     // A background video (IndexedDB record key) replaces the image layer;
     // loading is async and only re-runs when the key changes.
     void this.syncVideo(value.backgroundVideo)
+    // Composer effects (migrated from dsh-glass-composer): each toggle maps
+    // to a body attribute the composer-effect stylesheet gates on. The host
+    // half pre-applies the same attributes from localStorage before mount so
+    // reloads never flash the wrong composer style; this keeps them in sync
+    // with the settings section live.
+    body.toggleAttribute(COMPOSER_ATTRS.aistudio, value.aistudioComposer)
+    body.toggleAttribute(COMPOSER_ATTRS.glass, value.glassComposer)
+    body.toggleAttribute(COMPOSER_ATTRS.glow, value.glowComposer)
   }
 
   /**
@@ -298,10 +337,58 @@ export class AppearanceApplier {
     }
   }
 
+  /**
+   * Composer running-state mirror (migrated from dsh-glass-composer): the
+   * glow ring needs to know when the agent is running. The harness exposes no
+   * DOM signal on the composer card, so the running state is inferred from
+   * the primary button's stop-vs-send icon shape (svg > rect 10x10 = stop)
+   * and mirrored onto [data-composer-card] as data-composer-running. A
+   * MutationObserver reschedules a throttled scan on any DOM change; the CSS
+   * gates the ring on body[data-dsh-glow-composer] so the observer runs even
+   * when the effect is off (cheap, keeps the signal fresh for instant toggle).
+   */
+  private observeRunning(): void {
+    const root = document.documentElement ?? document.body
+    if (!root || typeof MutationObserver === 'undefined') return
+    const schedule = (): void => {
+      if (typeof requestAnimationFrame === 'function') requestAnimationFrame(() => this.scanRunning())
+      else setTimeout(() => this.scanRunning(), 120)
+    }
+    this.runningObserver = new MutationObserver(schedule)
+    this.runningObserver.observe(root, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['aria-label', 'data-composer-running'],
+    })
+    schedule()
+  }
+
+  private scanRunning(): void {
+    const cards = document.querySelectorAll<HTMLElement>('[data-composer-card]')
+    for (let i = 0; i < cards.length; i++) this.syncRunning(cards[i])
+  }
+
+  private syncRunning(card: HTMLElement): void {
+    let running = false
+    const buttons = card.querySelectorAll('button[type="button"]')
+    for (let i = 0; i < buttons.length; i++) {
+      const svg = buttons[i].querySelector('svg')
+      if (svg !== null && svg.querySelector('rect[width="10"][height="10"]') !== null) {
+        running = true
+        break
+      }
+    }
+    if (running) card.setAttribute('data-composer-running', '')
+    else card.removeAttribute('data-composer-running')
+  }
+
   /** Retract the override layer, the stylesheet, the layer element, and body variables. */
   dispose(): void {
     this.removeOverrides?.()
     this.removeOverrides = undefined
+    this.runningObserver?.disconnect()
+    this.runningObserver = undefined
     // Drop the keys BEFORE tearing down: a getVideo()/getImage() still in
     // flight resolves after dispose, and the key comparison is what stops it
     // from recreating media on the removed layer.
@@ -315,5 +402,7 @@ export class AppearanceApplier {
     for (const name of BODY_VARIABLES) body.style.removeProperty(name)
     body.style.removeProperty('--dsw-mask-blur')
     delete body.dataset.dswConversationGlass
+    // Retract the composer-effect body attributes (the stylesheet gates on them).
+    for (const attr of Object.values(COMPOSER_ATTRS)) body.removeAttribute(attr)
   }
 }

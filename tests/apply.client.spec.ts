@@ -60,6 +60,31 @@ describe('apply write path (localStorage)', () => {
     expect(store.getSnapshot().settings).toEqual(DEFAULT_SETTINGS)
   })
 
+  it('migrates legacy dsh-glass-composer toggles into a pre-merge section', () => {
+    // A pre-merge section predates the composer fields entirely.
+    const preMerge = { ...DEFAULT_SETTINGS, accent: '#112233' }
+    delete (preMerge as Record<string, unknown>).aistudioComposer
+    delete (preMerge as Record<string, unknown>).glassComposer
+    delete (preMerge as Record<string, unknown>).glowComposer
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(preMerge))
+    localStorage.setItem('dsh.aistudioComposer', '0')
+    localStorage.setItem('dsh.glassComposer', '1')
+    localStorage.setItem('dsh.glowComposer', '0')
+    const { store } = mount()
+    const s = store.getSnapshot().settings
+    expect(s.accent).toBe('#112233')
+    expect(s.aistudioComposer).toBe(false)
+    expect(s.glassComposer).toBe(true)
+    expect(s.glowComposer).toBe(false)
+  })
+
+  it('does not migrate legacy keys when the section already carries composer fields', () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...DEFAULT_SETTINGS, glassComposer: false }))
+    localStorage.setItem('dsh.glassComposer', '1')
+    const { store } = mount()
+    expect(store.getSnapshot().settings.glassComposer).toBe(false)
+  })
+
   it('boots with defaults when the persisted section is corrupt', () => {
     localStorage.setItem(STORAGE_KEY, '{not json')
     const { store } = mount()

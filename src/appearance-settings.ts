@@ -72,6 +72,13 @@ export interface AppearanceSettings extends AppearanceColors {
   conversationGlassBlur: number
   /** Glass blur in px added to the wallpaper blur, 0..20 (0 = no extra blur). */
   glassBlur: number
+  /** Composer effects (migrated from dsh-glass-composer): aurora gradient
+   * border on the new-session hero composer. */
+  aistudioComposer: boolean
+  /** Liquid Glass hero composer (frosted card). */
+  glassComposer: boolean
+  /** Spinning gradient ring on the in-conversation composer while running. */
+  glowComposer: boolean
   /** Tint alpha of emphasized text chips (inline code), 0..0.45. */
   emphasisAlpha: number
   /** Last applied preset id, or 'custom' after manual edits. */
@@ -101,6 +108,9 @@ export const DEFAULT_SETTINGS: AppearanceSettings = {
   conversationGlass: false,
   conversationGlassBlur: 8,
   glassBlur: 0,
+  aistudioComposer: true,
+  glassComposer: false,
+  glowComposer: true,
   emphasisAlpha: 0.22,
   preset: '',
 }
@@ -119,7 +129,7 @@ const NUMERIC_BOUNDS: Record<string, { min: number; max: number }> = {
 }
 
 /** Boolean fields, used to sanitize persisted input. */
-const BOOLEAN_FIELDS = ['imageDark', 'sidebarOpaque', 'conversationGlass'] as const
+const BOOLEAN_FIELDS = ['imageDark', 'sidebarOpaque', 'conversationGlass', 'aistudioComposer', 'glassComposer', 'glowComposer'] as const
 
 /** Canonicalize a hex color: lowercase, 3-digit expanded to 6-digit. */
 function normalizeHex(value: string): string {

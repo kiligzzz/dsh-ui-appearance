@@ -91,6 +91,26 @@ describe('AppearanceApplier', () => {
     expect(body.dataset.dswConversationGlass).toBeUndefined()
   })
 
+  it('composer toggles mirror onto body attributes; dispose retracts them', () => {
+    const { ctx } = fakeCtx()
+    const applier = new AppearanceApplier(ctx)
+    applier.apply(full({ aistudioComposer: true, glassComposer: false, glowComposer: true }))
+    const body = document.body
+    expect(body.hasAttribute('data-dsh-aistudio-composer')).toBe(true)
+    expect(body.hasAttribute('data-dsh-glass-composer')).toBe(false)
+    expect(body.hasAttribute('data-dsh-glow-composer')).toBe(true)
+    // The stylesheet carries the migrated composer effects.
+    const sheet = document.getElementById(STYLE_ID)?.textContent ?? ''
+    expect(sheet).toContain('data-dsh-glow-composer')
+    expect(sheet).toContain('dshAuroraSpin')
+    applier.apply(full({ aistudioComposer: false, glassComposer: true, glowComposer: false }))
+    expect(body.hasAttribute('data-dsh-aistudio-composer')).toBe(false)
+    expect(body.hasAttribute('data-dsh-glass-composer')).toBe(true)
+    expect(body.hasAttribute('data-dsh-glow-composer')).toBe(false)
+    applier.dispose()
+    expect(body.hasAttribute('data-dsh-glass-composer')).toBe(false)
+  })
+
   it('apply with undefined settings applies the default white accent', () => {
     const { ctx, overrideTokens, remove } = fakeCtx()
     const applier = new AppearanceApplier(ctx)
