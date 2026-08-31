@@ -116,6 +116,24 @@ body[data-dsw-conversation-glass] .dshDesktopDetailsSurface {
 body[data-dsw-conversation-glass] .dshDesktopFrame {
   background: transparent !important;
 }
+/* DSH Desktop shell squeeze fix: the shell's own stylesheet (injected as
+   dsh-desktop-settings-styles) declares a full-width rule on html/body/#root
+   AFTER dsh-better-sidebar's layout.css (bundle-injected, unstable order),
+   so at equal specificity the shell wins and #root stays full-width: the
+   better-sidebar margin-right only shifts the visual position while the
+   AppFrame grid keeps its fixed columns, leaving the right panel floating
+   over the conversation (screenshot: overlapping text). !important beats
+   the shell regardless of injection order, and the grid's third column
+   takes the panel width so the conversation column truly gives way. The
+   left column uses auto (shell-controlled width, no hard-coded px). */
+#root {
+  width: calc(100% - var(--dsh-sidebar-width, 0px)) !important;
+  margin-right: var(--dsh-sidebar-width, 0px) !important;
+  box-sizing: border-box !important;
+}
+.dshDesktopFrame {
+  grid-template-columns: auto minmax(0, 1fr) var(--dsh-sidebar-width, 0px) !important;
+}
 /* Composer effects (migrated from dsh-glass-composer). Each effect gates on a
    body attribute the host half pre-applies before mount and the applier keeps
    in sync with the settings section. */
