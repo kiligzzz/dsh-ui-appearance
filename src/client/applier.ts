@@ -149,14 +149,16 @@ body[data-dsw-conversation-glass] .dshDesktopFrame {
   backdrop-filter: blur(16px) saturate(1.4);
   -webkit-backdrop-filter: blur(16px) saturate(1.4);
 }
-/* Nested backdrop-filter conflict: the model menu renders INSIDE the composer
+/* Nested backdrop-filter limit: the model menu renders INSIDE the composer
    card, and browsers discard a child's backdrop-filter when an ancestor
-   already has one — the menu collapses to its 0.1-alpha background and looks
-   fully transparent. While any menu/listbox is open inside the card, suspend
-   the card's own blur so the menu's frosted glass applies again. */
-[data-composer-card]:has([role="menu"], [role="listbox"]) {
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+   already has one. Instead of toggling the card blur (visible flash), give
+   the menu a half-solid base built from its own theme token (relative color
+   keeps the hue, raises alpha): it rides on the card's already-blurred
+   backdrop, so the menu stays readable while the card never loses its
+   frosted look. Where the menu is NOT nested, its own blur still applies. */
+[role="menu"],
+[role="listbox"] {
+  background: rgb(from var(--dsw-specific-menu) r g b / 0.5) !important;
 }
 /* Composer effects (migrated from dsh-glass-composer). Each effect gates on a
    body attribute the host half pre-applies before mount and the applier keeps
