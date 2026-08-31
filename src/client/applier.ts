@@ -120,19 +120,29 @@ body[data-dsw-conversation-glass] .dshDesktopFrame {
    dsh-desktop-settings-styles) declares a full-width rule on html/body/#root
    AFTER dsh-better-sidebar's layout.css (bundle-injected, unstable order),
    so at equal specificity the shell wins and #root stays full-width: the
-   better-sidebar margin-right only shifts the visual position while the
-   AppFrame grid keeps its fixed columns, leaving the right panel floating
-   over the conversation (screenshot: overlapping text). !important beats
-   the shell regardless of injection order, and the grid's third column
-   takes the panel width so the conversation column truly gives way. The
-   left column uses auto (shell-controlled width, no hard-coded px). */
+   better-sidebar margin-right only shifts the visual position and the right
+   panel (an absolutely-positioned overlay, never a grid column) floats over
+   the conversation (screenshot: overlapping text). !important beats the
+   shell regardless of injection order. The grid is left untouched — Desktop
+   keeps its own columns (third = its hidden Details column, 0px), and the
+   narrowed #root shrinks the flexible 1fr conversation column, so the
+   overlay panel gets its space without ever expanding the Details column. */
 #root {
   width: calc(100% - var(--dsh-sidebar-width, 0px)) !important;
   margin-right: var(--dsh-sidebar-width, 0px) !important;
   box-sizing: border-box !important;
 }
-.dshDesktopFrame {
-  grid-template-columns: auto minmax(0, 1fr) var(--dsh-sidebar-width, 0px) !important;
+/* Frosted-glass overlays: translucent popovers (model picker menu, better-sidebar
+   panel) let the wallpaper through but blur whatever sits underneath (chat text),
+   so overlays stay see-through without text showing through confusingly. */
+[role="menu"],
+[role="listbox"] {
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+}
+[data-dsh-panel-host] [class*="_panel"] {
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
 }
 /* Composer effects (migrated from dsh-glass-composer). Each effect gates on a
    body attribute the host half pre-applies before mount and the applier keeps
