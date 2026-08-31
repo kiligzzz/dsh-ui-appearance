@@ -133,14 +133,19 @@ body[data-dsw-conversation-glass] .dshDesktopFrame {
   box-sizing: border-box !important;
 }
 /* Frosted-glass overlays: translucent popovers (model picker menu, better-sidebar
-   panel) let the wallpaper through but blur whatever sits underneath (chat text),
-   so overlays stay see-through without text showing through confusingly. */
+   panel) and the composer input card let the wallpaper through but blur whatever
+   sits underneath (chat text), so overlays stay see-through without text showing
+   through confusingly. */
 [role="menu"],
 [role="listbox"] {
   backdrop-filter: blur(16px) saturate(1.4);
   -webkit-backdrop-filter: blur(16px) saturate(1.4);
 }
 [data-dsh-panel-host] [class*="_panel"] {
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+}
+[data-composer-card] {
   backdrop-filter: blur(16px) saturate(1.4);
   -webkit-backdrop-filter: blur(16px) saturate(1.4);
 }
