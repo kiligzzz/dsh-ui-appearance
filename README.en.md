@@ -2,6 +2,8 @@
 
 [中文](README.md) · English
 
+> This repository is the customized `@kiligzzz/dsh-ui-appearance` fork. Fix releases and prebuilt packages are available on [GitHub Releases](https://github.com/kiligzzz/dsh-ui-appearance/releases). Download the `.tgz` and run `dsh plugin --profile <name> add /absolute/path/kiligzzz-dsh-ui-appearance-0.1.7.tgz`. This fork is not published to npm; the unscoped npm package and installation script below belong to upstream and do not include this fork's fixes. Do not enable both appearance plugins at once.
+
 An appearance customization plugin for the DeepSeek Harness WebUI — a freely re-colorable theme palette, wallpaper/video backgrounds, glassmorphism and background ambience, all previewed live and persisted automatically. Works in both the WebUI and DSH Desktop.
 
 [![Awesome DSH Plugin](https://awesome-dsh-plugin.com/badge.svg)](https://awesome-dsh-plugin.com)

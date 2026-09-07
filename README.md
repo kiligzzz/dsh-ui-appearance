@@ -2,6 +2,8 @@
 
 [English](README.en.md) · 中文
 
+> 本仓库是 `@kiligzzz/dsh-ui-appearance` 定制分支。修复版本和预构建安装包见 [GitHub Releases](https://github.com/kiligzzz/dsh-ui-appearance/releases)。下载 `.tgz` 后执行 `dsh plugin --profile <name> add /绝对路径/kiligzzz-dsh-ui-appearance-0.1.7.tgz`；本分支未发布到 npm，下文无 scope 的 npm 包和安装脚本属于上游，不包含本分支修复。不要同时启用两个外观插件。
+
 DeepSeek Harness 外观自定义插件 —— 自由调色的主题色板、壁纸/视频背景、毛玻璃与背景氛围,全部实时预览、自动持久化;WebUI 与 DSH Desktop 均可使用。
 
 [![Awesome DSH Plugin](https://awesome-dsh-plugin.com/badge.svg)](https://awesome-dsh-plugin.com)

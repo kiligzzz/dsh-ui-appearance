@@ -48,6 +48,18 @@ describe('AppearanceApplier', () => {
     applier.dispose()
   })
 
+  it('leaves sidebar space reservation to the sidebar plugin', () => {
+    const { ctx } = fakeCtx()
+    const applier = new AppearanceApplier(ctx)
+    try {
+      const sheet = document.getElementById(STYLE_ID)?.textContent ?? ''
+      expect(sheet).not.toContain('--dsh-sidebar-width')
+      expect(sheet).not.toMatch(/#root\s*\{/)
+    } finally {
+      applier.dispose()
+    }
+  })
+
   it('apply with custom settings writes body variables and forwards token overrides', () => {
     const { ctx, overrideTokens, remove } = fakeCtx()
     const applier = new AppearanceApplier(ctx)

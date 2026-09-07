@@ -116,22 +116,6 @@ body[data-dsw-conversation-glass] .dshDesktopDetailsSurface {
 body[data-dsw-conversation-glass] .dshDesktopFrame {
   background: transparent !important;
 }
-/* DSH Desktop shell squeeze fix: the shell's own stylesheet (injected as
-   dsh-desktop-settings-styles) declares a full-width rule on html/body/#root
-   AFTER dsh-better-sidebar's layout.css (bundle-injected, unstable order),
-   so at equal specificity the shell wins and #root stays full-width: the
-   better-sidebar margin-right only shifts the visual position and the right
-   panel (an absolutely-positioned overlay, never a grid column) floats over
-   the conversation (screenshot: overlapping text). !important beats the
-   shell regardless of injection order. The grid is left untouched — Desktop
-   keeps its own columns (third = its hidden Details column, 0px), and the
-   narrowed #root shrinks the flexible 1fr conversation column, so the
-   overlay panel gets its space without ever expanding the Details column. */
-#root {
-  width: calc(100% - var(--dsh-sidebar-width, 0px)) !important;
-  margin-right: var(--dsh-sidebar-width, 0px) !important;
-  box-sizing: border-box !important;
-}
 /* Frosted-glass overlays: translucent popovers (model picker menu, better-sidebar
    panel) and the composer input card let the wallpaper through but blur whatever
    sits underneath (chat text), so overlays stay see-through without text showing
